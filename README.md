@@ -1,2 +1,2 @@
-# TPI-P3-Cepeda-Rabbia-Volpe
-TPI Programación 3 (Reserva de hotel)
+# TPI-P3-Rabbia
+TPI Programación 3 (Sistema de Reservas de Canchas de Fútbol 5)
