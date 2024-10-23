@@ -58,7 +58,7 @@ namespace Infrastructure.Services
                 new Claim("sub", user.Id.ToString()), // ID del usuario
                 new Claim("email", user.Email), // Email del usuario
                 new Claim("role", user.Role.ToString()), // Rol del usuario
-                new Claim("name", user.Name.ToString()),
+                new Claim("given_name", user.Name.ToString()),
                 new Claim("enabled", user.Enabled.ToString())
             };
 

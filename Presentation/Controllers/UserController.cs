@@ -23,11 +23,6 @@ public class UserController : ControllerBase
 
     public ActionResult<ICollection<UserDto>> GetAll()
     {
-        /*foreach (var claim in User.Claims)
-        {
-            Console.WriteLine($"{claim.Type}: {claim.Value}");
-        }*/
-
         var users = _userService.GetAllUsers();
         var userDtos = users.Select(user => UserDto.Create(user)).ToList();
         return Ok(userDtos);
@@ -40,6 +35,8 @@ public class UserController : ControllerBase
         
         try
         {
+            if (bool.Parse(User.FindFirst("Enabled")?.Value))
+            {Console.WriteLine("Usuario habilitado");}
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             var user = _userService.GetUserById(id, userId);
             var userDto = UserDto.Create(user);
