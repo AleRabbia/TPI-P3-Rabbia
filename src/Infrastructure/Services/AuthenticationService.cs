@@ -30,7 +30,11 @@ namespace Infrastructure.Services
                 return null;
 
             var user = _userRepository.GetByMail(authenticationRequest.Email);
-            
+            if (user != null && !user.Enabled)
+            {
+                //validar que el usuario este habilitado
+                throw new UnauthorizedAccessException("El usuario no está habilitado.");
+            }
             if (user != null && user.Password == authenticationRequest.Password)
             {
                 return user;
