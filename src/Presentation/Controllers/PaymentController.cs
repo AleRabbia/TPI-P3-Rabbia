@@ -2,6 +2,7 @@ using System;
 using Application.Interfaces;
 using Application.Models;
 using Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
@@ -18,6 +19,7 @@ namespace Presentation.Controllers
             _paymentService = paymentService;
         }
 
+        [Authorize(Roles = "SysAdmin, Admin")]
         [HttpGet]
         public ActionResult<IEnumerable<PaymentDto>> GetAllPayments()
         {
@@ -37,7 +39,7 @@ namespace Presentation.Controllers
         }
 
         [HttpPost]
-        public ActionResult<Payment> AddPayment(PaymentCreateDto paymentCreateDto)
+        public ActionResult<Payment> AddPayment([FromBody]PaymentCreateDto paymentCreateDto)
         {
 
             var payment = _paymentService.AddPayment(paymentCreateDto);
@@ -53,8 +55,9 @@ namespace Presentation.Controllers
             return CreatedAtAction(nameof(GetPaymentById), new { id = payment.Id }, paymentDto);
         }
         
+        [Authorize(Roles = "SysAdmin, Admin")]
         [HttpGet("{id}")]
-        public ActionResult<PaymentDto> GetPaymentById(int id)
+        public ActionResult<PaymentDto> GetPaymentById([FromRoute]int id)
         {
             var payment = _paymentService.GetPaymentById(id);
             if (payment == null)
@@ -72,7 +75,7 @@ namespace Presentation.Controllers
         }
 
         [HttpGet("User/{UserId}")]
-        public ActionResult<PaymentDto> GetPaymentByUser(int UserId)
+        public ActionResult<PaymentDto> GetPaymentByUser([FromRoute]int UserId)
         {
             var paymentsByUser = _paymentService.GetPaymentByUser(UserId);
             if (paymentsByUser == null)
@@ -95,14 +98,14 @@ namespace Presentation.Controllers
         }
 
         [HttpDelete("{id}")]
-        public ActionResult DeletePaymente(int id)
+        public ActionResult DeletePaymente([FromRoute]int id)
         {
             _paymentService.DeletePayment(id);
             return NoContent();
         }
 
         [HttpPut("{id}")]
-        public ActionResult UpdatePaymet(int id, PaymentUpdateDto paymentUpdateDto)
+        public ActionResult UpdatePaymet([FromRoute]int id, [FromBody]PaymentUpdateDto paymentUpdateDto)
         {
             try
             {

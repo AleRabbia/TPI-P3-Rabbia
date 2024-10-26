@@ -19,30 +19,23 @@ public class FieldController : ControllerBase
         _fieldService = fieldService;
     }
 
+    
+    [Authorize(Roles = "SysAdmin, Admin")]
     [HttpGet]
 
     public ActionResult<ICollection<FieldDto>> GetAllFields()
     {
-       // int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
-        //var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-
-        //if (userRole != nameof(UserRole.Admin))
-            //return Forbid();
-
+        
         var fields = _fieldService.GetAllFields();
         var fieldDtos = fields.Select(field => FieldDto.CreateField(field)).ToList();
         return Ok(fieldDtos);  
     }
     
-[HttpGet("{id}")]
-    public ActionResult<FieldDto> GetFieldById(int id)
+
+    [HttpGet("{id}")]
+    public ActionResult<FieldDto> GetFieldById([FromRoute]int id)
     {
-        //int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
-        //var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-
-       // if (userRole != nameof(UserRole.Admin) && userId != id)
-         //   return Forbid();
-
+        
         var field = _fieldService.GetFieldById(id);
         if (field == null)
         {
@@ -57,34 +50,17 @@ public class FieldController : ControllerBase
     [HttpGet("enabled")]
     public ActionResult<IEnumerable<FieldDto>> GetEnabledField()
     {
-        //int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
-        //var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-
-       // if (userRole != nameof(UserRole.Admin))
-           // return Forbid();
+        
         var fields = _fieldService.GetEnabledFields();
         var fieldDtos = fields.Select(field => FieldDto.CreateField(field)).ToList();
         return Ok(fieldDtos);           
 
-
-        //var fields = _fieldService.GetEnabledFields();
-        //return Ok(fields);
     }
 
+    [Authorize(Roles = "SysAdmin, Admin")]
     [HttpPost]
-    public ActionResult CreateField(CreateFieldDto fieldDto)
+    public ActionResult CreateField([FromBody]CreateFieldDto fieldDto)
     {
-        //int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
-        //var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-
-        //if (userRole != nameof(UserRole.Admin))
-            //return Forbid();
-
-       // if (!Enum.TryParse(userDto.Role, out UserRole role))
-        //{
-          //  return BadRequest("Invalid role.");
-       // }
-
         var field = new Field
         {
             Name = fieldDto.Name,           
@@ -98,19 +74,11 @@ public class FieldController : ControllerBase
         return CreatedAtAction(nameof(GetFieldById), new { id = field.Id }, FieldDto.CreateField(field));
     }
     
+    [Authorize(Roles = "SysAdmin, Admin")]
     [HttpPut("{id}")]
-    public ActionResult UpdateField(int id, UpdateFieldDto fieldDto)
+    public ActionResult UpdateField([FromRoute]int id,[FromBody] UpdateFieldDto fieldDto)
     {
-        //int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
-        //var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-
-//        if (userRole != nameof(UserRole.Admin) && userRole != nameof(UserRole.Customer) && userId != id)
-  //          return Forbid();
-
-
-       // if (!Enum.TryParse(userDto.Role, out UserRole role))
-       // {            return BadRequest("Invalid role.");        }
-
+        
         var existingField = _fieldService.GetFieldById(id);
         if (existingField == null)
         {
@@ -125,19 +93,10 @@ public class FieldController : ControllerBase
         _fieldService.UpdateField(existingField);
         return NoContent();
     }
-
-   [HttpPatch("admin/{id}")]
-    public ActionResult Update(int id, UpdateFieldDtoAdmin fieldDto)
+    [Authorize(Roles = "SysAdmin")]
+    [HttpPatch("admin/{id}")]
+    public ActionResult Update([FromRoute]int id, [FromBody]UpdateFieldDtoAdmin fieldDto)
     {
-        //int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
-        //var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-
-//        if (userRole != nameof(UserRole.Admin) && userRole != nameof(UserRole.Customer) && userId != id)
-  //          return Forbid();
-
-
-       // if (!Enum.TryParse(userDto.Role, out UserRole role))
-       // {            return BadRequest("Invalid role.");        }
 
         var existingField = _fieldService.GetFieldById(id);
         if (existingField == null)
@@ -170,15 +129,11 @@ public class FieldController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Roles = "SysAdmin, Admin")]
     [HttpDelete("{id}")]
-    public ActionResult Delete(int id)
+    public ActionResult Delete([FromRoute]int id)
     {
-        //int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
-        //var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-
-      //  if(userRole != nameof(UserRole.Admin) && userRole != nameof(UserRole.Customer))
-             //   return Forbid();
-
+        
         var existingField = _fieldService.GetFieldById(id);
         if (existingField == null)
         {

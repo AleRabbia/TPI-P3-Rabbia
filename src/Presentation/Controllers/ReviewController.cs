@@ -41,7 +41,7 @@ public class ReviewController : ControllerBase
         }
 
         [HttpPost]
-        public ActionResult<ReviewDto> AddReview(CreateReviewDto createReviewDto)
+        public ActionResult<ReviewDto> AddReview([FromBody]CreateReviewDto createReviewDto)
         {
             
 
@@ -58,8 +58,9 @@ public class ReviewController : ControllerBase
 
             return CreatedAtAction(nameof(GetById), new { id = reviewDto.Id }, reviewDto);
         }
+
         [HttpGet("{id}")]
-        public ActionResult<ReviewDto> GetById(int id)
+        public ActionResult<ReviewDto> GetById([FromRoute]int id)
         {
             var review = _reviewService.GetReviewById(id);
             if (review == null)
@@ -77,8 +78,9 @@ public class ReviewController : ControllerBase
 
             return reviewDto;
         }
+
         [HttpGet("field/{id}")]
-        public ActionResult<ReviewDto> GetByField(int id)
+        public ActionResult<ReviewDto> GetByField([FromRoute]int id)
         {
             var reviews = _reviewService.GetReviewByField(id);
             var reviewsDTOs = new List<ReviewDto>();
@@ -96,8 +98,9 @@ public class ReviewController : ControllerBase
             }
             return Ok(reviewsDTOs);
         }
+
         [HttpGet("user/{id}")]
-        public ActionResult<ReviewDto> GetByUser(int id)
+        public ActionResult<ReviewDto> GetByUser([FromRoute]int id)
         {
             var reviews = _reviewService.GetReviewByUser(id);
             var reviewsDTOs = new List<ReviewDto>();
@@ -117,7 +120,7 @@ public class ReviewController : ControllerBase
         }
 
         [HttpPut("{id}")]
-        public ActionResult UpdateReview(int id, UpdateReviewDto updateReviewDto)
+        public ActionResult UpdateReview([FromRoute]int id,[FromBody] UpdateReviewDto updateReviewDto)
         {
            
             try
@@ -131,7 +134,7 @@ public class ReviewController : ControllerBase
             }
         }
         [HttpDelete("{id}")]
-        public ActionResult DeleteReview(int id)
+        public ActionResult DeleteReview([FromRoute]int id)
         {
 
             _reviewService.DeleteReview(id);

@@ -18,9 +18,8 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
-    [Authorize(Roles = "SysAdmin")]
+    [Authorize(Roles = "SysAdmin, Admin")]
     [HttpGet]
-
     public ActionResult<ICollection<UserDto>> GetAll()
     {
         var users = _userService.GetAllUsers();
@@ -28,17 +27,17 @@ public class UserController : ControllerBase
         return Ok(userDtos);
     }
 
-    [Authorize]
+    [Authorize(Roles = "SysAdmin, Admin")]
     [HttpGet("{id}")]
-    public ActionResult<UserDto> GetById(int id)
+    public ActionResult<UserDto> GetById([FromRoute]int id)
     {
         
         try
         {
-            if (bool.Parse(User.FindFirst("Enabled")?.Value))
-            {Console.WriteLine("Usuario habilitado");}
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var user = _userService.GetUserById(id, userId);
+            //if (bool.Parse(User.FindFirst("Enabled")?.Value))
+            //{Console.WriteLine("Usuario habilitado");}
+            //var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var user = _userService.GetUserById(id,null); //ver
             var userDto = UserDto.Create(user);
             return Ok(userDto);
         }
@@ -62,9 +61,9 @@ public class UserController : ControllerBase
 
     [Authorize(Roles = "SysAdmin")]
     [HttpPost("create")]
-    public ActionResult Create(CreateUserDto userDto)
+    public ActionResult Create([FromBody]CreateUserDto userDto)
     {
-        var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+        var userRole = User.FindFirst(ClaimTypes.Role)?.Value;//ver no es necesario
         if (userRole == "SysAdmin")
         {
             var user = new User
@@ -85,7 +84,7 @@ public class UserController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("Register")]
-    public ActionResult RegisterUser(RegisterUserDto registerUserDto)
+    public ActionResult RegisterUser([FromBody]RegisterUserDto registerUserDto)
     {
                var user = new User
         {
@@ -102,7 +101,7 @@ public class UserController : ControllerBase
     
     [Authorize]
     [HttpPut("{id}")]
-    public ActionResult Update(int id, UpdateUserDto userDto)
+    public ActionResult Update([FromRoute]int id,[FromBody] UpdateUserDto userDto)
     {
 
         try
@@ -126,6 +125,7 @@ public class UserController : ControllerBase
             return NotFound();
         }
     }
+
     [Authorize(Roles ="SysAdmin")]
     [HttpPatch("admin/{id}")]
     public ActionResult Update(int id, UpdateuserDtoAdmin userDto)
@@ -163,27 +163,21 @@ public class UserController : ControllerBase
         _userService.DeleteUserLogic(existingUser);
         return NoContent();
     }
+
     [Authorize]
     [HttpDelete("{id}")]
-    public ActionResult Delete(int id)
+    public ActionResult Delete([FromRoute]int id)
     {
     
         try
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var enabledClaim = User.FindFirst("enabled")?.Value;
-
-            if (enabledClaim == null || !bool.Parse(enabledClaim))
-            {
-                throw new KeyNotFoundException("Usuario no Habilitado.");
-            }
-            else
-            {                           
-                var existingUser = _userService.GetUserById(id, userId);
+                                    
+            var existingUser = _userService.GetUserById(id, userId);
         
-                _userService.DeleteUser(existingUser.Id);
-                return NoContent();
-                }
+            _userService.DeleteUser(existingUser.Id);
+            return NoContent();
+                
         }
         catch (UnauthorizedAccessException)
         {
@@ -193,12 +187,6 @@ public class UserController : ControllerBase
         {
             return NotFound();
         }
-        //int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
-        //var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-
-      //  if(userRole != nameof(UserRole.Admin) && userRole != nameof(UserRole.Customer))
-             //   return Forbid();
-
         
     }
 }

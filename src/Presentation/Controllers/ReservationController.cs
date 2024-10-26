@@ -1,6 +1,7 @@
 using System;
 using Application.Interfaces;
 using Application.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
@@ -16,6 +17,7 @@ namespace Presentation.Controllers
             _reservationService = reservationService;
         }
         
+        [Authorize(Roles = "SysAdmin, Admin")]
         [HttpGet]
         public ActionResult<IEnumerable<ReservationDto>> GetAllReservation()
         {
@@ -38,7 +40,7 @@ namespace Presentation.Controllers
 
 
         [HttpGet("{id}")]
-        public ActionResult<ReservationDto> GetReservarionById(int id)
+        public ActionResult<ReservationDto> GetReservarionById([FromRoute]int id)
         {
             var reservation = _reservationService.GetReservarionById(id);
             if (reservation == null)
@@ -57,7 +59,7 @@ namespace Presentation.Controllers
             return Ok(reservationDto);
         }
 
-
+        [Authorize(Roles = "SysAdmin, Admin")]
         [HttpGet("Paid")]
         public ActionResult<IEnumerable<ReservationDto>> GetReservationByPaid()
         {
@@ -72,7 +74,7 @@ namespace Presentation.Controllers
         }
 
         [HttpPost]
-        public ActionResult<ReservationDto> AddReservation(ReservationCreateDto reservationCreateDto)
+        public ActionResult<ReservationDto> AddReservation([FromBody]ReservationCreateDto reservationCreateDto)
         {
 
             var reservation = _reservationService.AddReservation(reservationCreateDto);
@@ -92,7 +94,7 @@ namespace Presentation.Controllers
         }
 
         [HttpPut("{id}")]
-        public ActionResult UpdateReservation(int id, ReservationUpdateDto reservationUpdateDto)
+        public ActionResult UpdateReservation([FromRoute]int id,[FromBody] ReservationUpdateDto reservationUpdateDto)
         {
             try
             {
@@ -105,9 +107,9 @@ namespace Presentation.Controllers
             }
         }
         
-
+        [Authorize(Roles = "SysAdmin")]
         [HttpPatch("{id}")]
-        public ActionResult UpdateReservationAdmin(int id, ReservationUpdateAdmin reservationUpdateAdmin)
+        public ActionResult UpdateReservationAdmin([FromRoute]int id, [FromBody]ReservationUpdateAdmin reservationUpdateAdmin)
         {
             try
             {
@@ -122,7 +124,7 @@ namespace Presentation.Controllers
         
 
         [HttpDelete("{id}")]
-        public ActionResult DeleteReservation(int id)
+        public ActionResult DeleteReservation([FromRoute]int id)
         {
 
             _reservationService.DeleteReservation(id);
