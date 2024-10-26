@@ -1,4 +1,5 @@
 using System;
+using System.Security.Claims;
 using Application.Interfaces;
 using Application.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -117,13 +118,23 @@ namespace Presentation.Controllers
             }
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         public ActionResult UpdateReservation([FromRoute]int id,[FromBody] ReservationUpdateDto reservationUpdateDto)
         {
             try
             {
-                _reservationService.UpdateReservation(id, reservationUpdateDto);
-                return NoContent();
+                var user = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var reservation = _reservationService.GetReservarionById(id);
+                if (user == reservation.UserId)
+                {
+                    _reservationService.UpdateReservation(id, reservationUpdateDto);
+                    return NoContent();
+
+                }
+            else {
+                return BadRequest($"Solo puede modificar reservas del usuario {user} ");
+            }
             }
             catch (Exception ex)
             {
@@ -146,13 +157,21 @@ namespace Presentation.Controllers
             }
         }
         
-
+        [Authorize]
         [HttpDelete("{id}")]
         public ActionResult DeleteReservation([FromRoute]int id)
         {
             try {
-            _reservationService.DeleteReservation(id);
-            return NoContent();
+                var user = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var reservation = _reservationService.GetReservarionById(id);
+                if (user == reservation.UserId)
+                {
+                    _reservationService.DeleteReservation(id);
+                    return NoContent();
+                }
+                else{
+                    return BadRequest($"Solo puede eliminar reservas del usuario {user} ");
+                }
             }
             catch (Exception ex)
             {

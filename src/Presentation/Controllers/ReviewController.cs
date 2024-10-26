@@ -148,14 +148,23 @@ public class ReviewController : ControllerBase
             }
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         public ActionResult UpdateReview([FromRoute]int id,[FromBody] UpdateReviewDto updateReviewDto)
         {
            
             try
             {
+                var user = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var review = _reviewService.GetReviewById(id);
+                if (user == review.UserId)
+                {
                 _reviewService.UpdateReview(id, updateReviewDto);
                 return NoContent();
+                }
+                else{
+                    return BadRequest($"Solo puede modificar las reseñas del usuario {user} ");
+                }
             }
             catch (Exception ex)
             {
