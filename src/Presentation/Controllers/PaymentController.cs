@@ -1,4 +1,5 @@
 using System;
+using System.Security.Claims;
 using Application.Interfaces;
 using Application.Models;
 using Domain.Entities;
@@ -13,10 +14,12 @@ namespace Presentation.Controllers
     public class PaymentController : ControllerBase
     {        
         private readonly IPaymentService _paymentService;
+        private readonly IReservationService _reservationService;
 
-        public PaymentController(IPaymentService paymentService)
+        public PaymentController(IPaymentService paymentService, IReservationService reservationService)
         {
             _paymentService = paymentService;
+            _reservationService = reservationService;
         }
 
         [Authorize(Roles = "SysAdmin, Admin")]
@@ -91,11 +94,15 @@ namespace Presentation.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("User/{UserId}")]
         public ActionResult<PaymentDto> GetPaymentByUser([FromRoute]int UserId)
         {
             try {
-            var paymentsByUser = _paymentService.GetPaymentByUser(UserId);
+            var user = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            if (user == UserId)
+            {
+                var paymentsByUser = _paymentService.GetPaymentByUser(UserId);
             if (paymentsByUser == null)
             {
                 return NotFound($"El usuario {UserId} no posee pagos realizados.");
@@ -114,18 +121,33 @@ namespace Presentation.Controllers
             }
             return Ok(paymentDTOs);
             }
+            else {
+                return BadRequest($"Solo puede ver los pagos del usuario {user} ");
+            }
+            
+            }
             catch (Exception ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public ActionResult DeletePaymente([FromRoute]int id)
         {
             try {
+                var user = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var pay = _paymentService.GetPaymentById(id);
+                var reservation = _reservationService.GetReservarionById(pay.ReservationId);
+            if (user == reservation.UserId)
+            {
             _paymentService.DeletePayment(id);
             return NoContent();
+            }
+            else{
+                return BadRequest($"Solo puede eliminar pagos del usuario {user} ");
+            }
             }
             catch (Exception ex)
             {
@@ -133,13 +155,24 @@ namespace Presentation.Controllers
             }
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         public ActionResult UpdatePaymet([FromRoute]int id, [FromBody]PaymentUpdateDto paymentUpdateDto)
         {
             try
+            {   
+                var user = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var pay = _paymentService.GetPaymentById(id);
+                var reservation = _reservationService.GetReservarionById(pay.ReservationId);
+            if (user == reservation.UserId)
             {
                 _paymentService.UpdatePayment(id, paymentUpdateDto);
                 return NoContent();
+            }
+            else
+            {
+                return BadRequest($"Solo puede modificar pagos del usuario {user} ");
+            }
             }
             catch (Exception ex)
             {
