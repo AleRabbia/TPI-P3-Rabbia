@@ -171,12 +171,22 @@ public class ReviewController : ControllerBase
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [Authorize]
         [HttpDelete("{id}")]
         public ActionResult DeleteReview([FromRoute]int id)
         {
             try {
+                var user = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var review = _reviewService.GetReviewById(id);
+                if (user == review.UserId)
+                {
             _reviewService.DeleteReview(id);
             return NoContent();
+                }
+                else{
+                    return BadRequest($"Solo puede eliminar las reseñas del usuario {user} ");
+                }
             }
             catch (Exception ex)
             {
