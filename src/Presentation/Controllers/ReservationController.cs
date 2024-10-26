@@ -21,27 +21,35 @@ namespace Presentation.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<ReservationDto>> GetAllReservation()
         {
-            var reservations = _reservationService.GetAllReservation();
-            var reservationDTOs = new List<ReservationDto>();
-            foreach (var reservation in reservations)
-            {
-                reservationDTOs.Add(new ReservationDto
+            try {
+                var reservations = _reservationService.GetAllReservation();
+                var reservationDTOs = new List<ReservationDto>();
+                foreach (var reservation in reservations)
                 {
-                    Id = reservation.Id,
-                    UserId = reservation.UserId,
-                    FieldId = reservation.FieldId,
-                    DateTime = reservation.DateTime,
-                    TotalPrice = reservation.TotalPrice,
-                    IsPaid = reservation.IsPaid
-                });
+                    reservationDTOs.Add(new ReservationDto
+                    {
+                        Id = reservation.Id,
+                        UserId = reservation.UserId,
+                        FieldId = reservation.FieldId,
+                        DateTime = reservation.DateTime,
+                        TotalPrice = reservation.TotalPrice,
+                        IsPaid = reservation.IsPaid
+                    });
+                }
+                return Ok(reservationDTOs);
             }
-            return Ok(reservationDTOs);
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            
         }
 
 
         [HttpGet("{id}")]
         public ActionResult<ReservationDto> GetReservarionById([FromRoute]int id)
         {
+            try {
             var reservation = _reservationService.GetReservarionById(id);
             if (reservation == null)
             {
@@ -57,26 +65,37 @@ namespace Presentation.Controllers
                 IsPaid = reservation.IsPaid
             };
             return Ok(reservationDto);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            } 
         }
 
         [Authorize(Roles = "SysAdmin, Admin")]
         [HttpGet("Paid")]
         public ActionResult<IEnumerable<ReservationDto>> GetReservationByPaid()
         {
+            try{
             var reservations = _reservationService.GetReservationByPaid();
             if (reservations == null)
             {
                 return NotFound("Reserva no encontrada.");
             }
             var reservationDtos = reservations.Select(reservation => ReservationDto.CreateReservation(reservation)).ToList();
-            return Ok(reservationDtos);           
+            return Ok(reservationDtos);    
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }       
 
         }
 
         [HttpPost]
         public ActionResult<ReservationDto> AddReservation([FromBody]ReservationCreateDto reservationCreateDto)
         {
-
+            try {
             var reservation = _reservationService.AddReservation(reservationCreateDto);
             var reservationDateTime = reservationCreateDto.Date.Add(reservationCreateDto.Time);
 
@@ -91,6 +110,11 @@ namespace Presentation.Controllers
             };
 
             return CreatedAtAction(nameof(GetReservarionById), new { id = reservationDto.Id }, reservationDto);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
@@ -126,9 +150,14 @@ namespace Presentation.Controllers
         [HttpDelete("{id}")]
         public ActionResult DeleteReservation([FromRoute]int id)
         {
-
+            try {
             _reservationService.DeleteReservation(id);
             return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
 

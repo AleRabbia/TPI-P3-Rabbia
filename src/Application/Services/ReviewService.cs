@@ -45,6 +45,10 @@ namespace Application.Services
 
         public void DeleteReview(int id)
         {
+            var review = _reviewRepository.GetReviewById(id);
+            if (review == null)
+                throw new Exception("No existe la reseña.");
+                
              _reviewRepository.DeleteReview(id);
         }
 

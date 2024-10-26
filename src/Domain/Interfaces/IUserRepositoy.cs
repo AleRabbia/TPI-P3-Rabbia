@@ -17,5 +17,6 @@ namespace Domain.Interfaces
         void Delete(int id);
         User GetByMail(string email);
         IEnumerable<User> GetEnabledUsers();
+        bool EmailExists(string email);
     }
 }

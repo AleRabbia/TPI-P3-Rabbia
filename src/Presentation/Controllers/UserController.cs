@@ -22,9 +22,15 @@ public class UserController : ControllerBase
     [HttpGet]
     public ActionResult<ICollection<UserDto>> GetAll()
     {
+        try {
         var users = _userService.GetAllUsers();
         var userDtos = users.Select(user => UserDto.Create(user)).ToList();
         return Ok(userDtos);
+        }
+        catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
     }
 
     [Authorize(Roles = "SysAdmin, Admin")]
@@ -55,17 +61,25 @@ public class UserController : ControllerBase
     [HttpGet("enabled")]
     public ActionResult<IEnumerable<UserDto>> GetEnabledUsers()
     {      
+        try {
         var users = _userService.GetEnabledUsers();
         return Ok(users);
+        }
+        catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
     }
 
     [Authorize(Roles = "SysAdmin")]
     [HttpPost("create")]
     public ActionResult Create([FromBody]CreateUserDto userDto)
     {
-        var userRole = User.FindFirst(ClaimTypes.Role)?.Value;//ver no es necesario
-        if (userRole == "SysAdmin")
-        {
+        try{
+            if (_userService.EmailExists(userDto.Email))
+                {
+                return BadRequest(new { message = "Ya existe un usuario con este correo electrónico." });
+                }
             var user = new User
             {
                 Name = userDto.Name,           
@@ -78,7 +92,10 @@ public class UserController : ControllerBase
             _userService.AddUser(user);
             return CreatedAtAction(nameof(GetById), new { id = user.Id }, UserDto.Create(user));
         }
-            return Forbid();
+        catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
               
     }
 
@@ -86,17 +103,27 @@ public class UserController : ControllerBase
     [HttpPost("Register")]
     public ActionResult RegisterUser([FromBody]RegisterUserDto registerUserDto)
     {
+        try {
+            if (_userService.EmailExists(registerUserDto.Email))
+                {
+                return BadRequest(new { message = "Ya existe un usuario con este correo electrónico." });
+                }
                var user = new User
-        {
-            Name = registerUserDto.Name,           
-            Email = registerUserDto.Email,
-            Password = registerUserDto.Password,
-            Role = "Customer",
-            Enabled = true
-        };
+                {
+                    Name = registerUserDto.Name,           
+                    Email = registerUserDto.Email,
+                    Password = registerUserDto.Password,
+                    Role = "Customer",
+                    Enabled = true
+                };
 
-        _userService.AddUser(user);
-        return CreatedAtAction(nameof(GetById), new { id = user.Id }, UserDto.Create(user));
+                _userService.AddUser(user);
+                return CreatedAtAction(nameof(GetById), new { id = user.Id }, UserDto.Create(user));
+                }
+                catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
     }
     
     [Authorize]
@@ -109,9 +136,7 @@ public class UserController : ControllerBase
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             var existingUser = _userService.GetUserById(id, userId);
             existingUser.Name = userDto.Name;
-            existingUser.Email = userDto.Email;
             existingUser.Password = userDto.Password;
-            existingUser.Role = userDto.Role;
     
             _userService.UpdateUser(existingUser);
             return NoContent();
@@ -130,6 +155,7 @@ public class UserController : ControllerBase
     [HttpPatch("admin/{id}")]
     public ActionResult Update(int id, UpdateuserDtoAdmin userDto)
     {
+        try {
         var existingUser = _userService.GetUserById(id, null);
         if (existingUser == null)
         {
@@ -162,6 +188,11 @@ public class UserController : ControllerBase
         }
         _userService.DeleteUserLogic(existingUser);
         return NoContent();
+        }
+        catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
     }
 
     [Authorize]

@@ -28,6 +28,9 @@ namespace Application.Services
             var field = _fieldRepository.GetFieldById(reservationCreateDto.FieldId);
             if (field == null)
                 throw new Exception("Campo no encontrado");
+            
+            if (!field.Enabled)
+                throw new Exception("Campo no habilitado");
 
             DateTime reservationDateTime = reservationCreateDto.Date.Date.Add(reservationCreateDto.Time);
             DateTime endTime = reservationDateTime.AddHours(field.DurationInHours);
@@ -180,11 +183,7 @@ namespace Application.Services
                 reservationExisting.TotalPrice = reservationUpdateAdmin.TotalPrice.Value;
                 Console.WriteLine($"Total {reservationUpdateAdmin.TotalPrice.Value}");
             }
-            if (reservationUpdateAdmin.IsPaid != null)
-            {
-                reservationExisting.IsPaid = reservationUpdateAdmin.IsPaid.Value;
-                Console.WriteLine($"IsPaid {reservationUpdateAdmin.IsPaid.Value}");
-            }
+            
 
 
             _reservationRepository.UpdateReservationAdmin(reservationExisting);

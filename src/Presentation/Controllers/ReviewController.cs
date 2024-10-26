@@ -23,6 +23,7 @@ public class ReviewController : ControllerBase
         [HttpGet]
         public ActionResult<IEnumerable<ReviewDto>> GetAll()
         {
+            try {
             var reviews = _reviewService.GetAllReviews();
             var reviewsDTOs = new List<ReviewDto>();
             foreach (var review in reviews)
@@ -38,13 +39,18 @@ public class ReviewController : ControllerBase
                 });
             }
             return Ok(reviewsDTOs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost]
         public ActionResult<ReviewDto> AddReview([FromBody]CreateReviewDto createReviewDto)
         {
             
-
+            try{
             var review = _reviewService.AddReview(createReviewDto);
 
             var reviewDto = new ReviewDto
@@ -57,11 +63,17 @@ public class ReviewController : ControllerBase
             };
 
             return CreatedAtAction(nameof(GetById), new { id = reviewDto.Id }, reviewDto);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("{id}")]
         public ActionResult<ReviewDto> GetById([FromRoute]int id)
         {
+            try {
             var review = _reviewService.GetReviewById(id);
             if (review == null)
             {
@@ -77,11 +89,17 @@ public class ReviewController : ControllerBase
             };
 
             return reviewDto;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("field/{id}")]
         public ActionResult<ReviewDto> GetByField([FromRoute]int id)
         {
+            try {
             var reviews = _reviewService.GetReviewByField(id);
             var reviewsDTOs = new List<ReviewDto>();
             foreach (var review in reviews)
@@ -97,11 +115,17 @@ public class ReviewController : ControllerBase
                 });
             }
             return Ok(reviewsDTOs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("user/{id}")]
         public ActionResult<ReviewDto> GetByUser([FromRoute]int id)
         {
+            try {
             var reviews = _reviewService.GetReviewByUser(id);
             var reviewsDTOs = new List<ReviewDto>();
             foreach (var review in reviews)
@@ -117,6 +141,11 @@ public class ReviewController : ControllerBase
                 });
             }
             return Ok(reviewsDTOs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
@@ -136,9 +165,14 @@ public class ReviewController : ControllerBase
         [HttpDelete("{id}")]
         public ActionResult DeleteReview([FromRoute]int id)
         {
-
+            try {
             _reviewService.DeleteReview(id);
             return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
 }

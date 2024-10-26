@@ -16,6 +16,7 @@ namespace Application.Interfaces
         void DeleteUserLogic(User user);
         void DeleteUser(int id);
         IEnumerable<UserDto> GetEnabledUsers();
+        bool EmailExists(string email);
     }
 }
 

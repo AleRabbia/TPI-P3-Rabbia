@@ -13,5 +13,4 @@ public class ReservationUpdateAdmin
         public DateTime? Date { get; set; }
         public TimeSpan? Time { get; set; }
         public float? TotalPrice { get; set; }
-        public bool? IsPaid { get;  set; }
 }

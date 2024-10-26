@@ -25,17 +25,22 @@ public class FieldController : ControllerBase
 
     public ActionResult<ICollection<FieldDto>> GetAllFields()
     {
-        
+        try {
         var fields = _fieldService.GetAllFields();
         var fieldDtos = fields.Select(field => FieldDto.CreateField(field)).ToList();
         return Ok(fieldDtos);  
+        }
+        catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
     }
     
 
     [HttpGet("{id}")]
     public ActionResult<FieldDto> GetFieldById([FromRoute]int id)
     {
-        
+        try{
         var field = _fieldService.GetFieldById(id);
         if (field == null)
         {
@@ -44,16 +49,26 @@ public class FieldController : ControllerBase
 
         var fieldDto = FieldDto.CreateField(field);
         return Ok(fieldDto);
+        }
+        catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
     }
 
 
     [HttpGet("enabled")]
     public ActionResult<IEnumerable<FieldDto>> GetEnabledField()
     {
-        
+        try{
         var fields = _fieldService.GetEnabledFields();
         var fieldDtos = fields.Select(field => FieldDto.CreateField(field)).ToList();
-        return Ok(fieldDtos);           
+        return Ok(fieldDtos); 
+        }
+        catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }          
 
     }
 
@@ -61,6 +76,7 @@ public class FieldController : ControllerBase
     [HttpPost]
     public ActionResult CreateField([FromBody]CreateFieldDto fieldDto)
     {
+        try{
         var field = new Field
         {
             Name = fieldDto.Name,           
@@ -72,13 +88,18 @@ public class FieldController : ControllerBase
 
         _fieldService.AddField(field);
         return CreatedAtAction(nameof(GetFieldById), new { id = field.Id }, FieldDto.CreateField(field));
+        }
+        catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
     }
     
     [Authorize(Roles = "SysAdmin, Admin")]
     [HttpPut("{id}")]
     public ActionResult UpdateField([FromRoute]int id,[FromBody] UpdateFieldDto fieldDto)
     {
-        
+        try {
         var existingField = _fieldService.GetFieldById(id);
         if (existingField == null)
         {
@@ -92,12 +113,17 @@ public class FieldController : ControllerBase
         
         _fieldService.UpdateField(existingField);
         return NoContent();
+        }
+        catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
     }
     [Authorize(Roles = "SysAdmin")]
     [HttpPatch("admin/{id}")]
     public ActionResult Update([FromRoute]int id, [FromBody]UpdateFieldDtoAdmin fieldDto)
     {
-
+        try {
         var existingField = _fieldService.GetFieldById(id);
         if (existingField == null)
         {
@@ -105,35 +131,40 @@ public class FieldController : ControllerBase
         }
 
             if (fieldDto.Name != null)
-    {
-        existingField.Name = fieldDto.Name;
-    }
+        {
+            existingField.Name = fieldDto.Name;
+        }
 
-     if (fieldDto.Type != null)
-    {
-        existingField.Type = fieldDto.Type;
-    }
-    if(fieldDto.Price.HasValue)
-    {
-    existingField.Price = fieldDto.Price.Value;
-    }
-    if(fieldDto.DurationInHours.HasValue)
-    {
-        existingField.DurationInHours = fieldDto.DurationInHours.Value;
-    }
-    if (fieldDto.Enabled.HasValue)
-    {
-        existingField.Enabled = fieldDto.Enabled.Value;
-    }
-        _fieldService.DeleteFieldLogic(existingField);
-        return NoContent();
+        if (fieldDto.Type != null)
+        {
+            existingField.Type = fieldDto.Type;
+        }
+        if(fieldDto.Price.HasValue)
+        {
+        existingField.Price = fieldDto.Price.Value;
+        }
+        if(fieldDto.DurationInHours.HasValue)
+        {
+            existingField.DurationInHours = fieldDto.DurationInHours.Value;
+        }
+        if (fieldDto.Enabled.HasValue)
+        {
+            existingField.Enabled = fieldDto.Enabled.Value;
+        }
+            _fieldService.DeleteFieldLogic(existingField);
+            return NoContent();
+        }
+        catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
     }
 
     [Authorize(Roles = "SysAdmin, Admin")]
     [HttpDelete("{id}")]
     public ActionResult Delete([FromRoute]int id)
     {
-        
+        try {
         var existingField = _fieldService.GetFieldById(id);
         if (existingField == null)
         {
@@ -142,5 +173,10 @@ public class FieldController : ControllerBase
 
         _fieldService.DeleteField(id);
         return NoContent();
+        }
+        catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
     }
 }

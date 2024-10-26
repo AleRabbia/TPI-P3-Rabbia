@@ -63,5 +63,10 @@ namespace Infrastructure.Repositories
         {
             return _context.Users.Where(u => u.Enabled).ToList();
         }
+
+        public bool EmailExists(string email)
+        {
+            return _context.Users.Any(u => u.Email == email);
+        }
     }
 }

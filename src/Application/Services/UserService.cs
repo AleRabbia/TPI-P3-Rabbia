@@ -66,5 +66,10 @@ namespace Application.Services
             var enabledUsers = _userRepository.GetEnabledUsers();
             return enabledUsers.Select(user => UserDto.Create(user));
         }
+
+        public bool EmailExists(string email)
+        {
+            return _userRepository.EmailExists(email);
+        }
     }
 }
